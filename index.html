@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Crypto Inventario</title>
+<meta name="theme-color" content="#0a0a1f">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Inventario">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-180.png">
+  <script type="module" crossorigin src="./assets/index-Bj-ur90y.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DN3BelC7.css">
+</head>
+<body>
+<main id="list">
+<div id="ctl" class="card blk ctl"><h1>Crypto Inventario</h1><div id="ck"><b></b><small></small></div><p id="status"><i id="dot"></i><span id="time">Connecting…</span></p><span id="sum"></span><div id="tfs" class="tfs" role="group" aria-label="Time range"></div><div class="acts"><button id="gear" class="ib" aria-label="Edit pairs" title="Edit pairs"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button></div><i class="rz"></i></div>
+</main>
+<p id="err" hidden></p>
+<dialog id="cfg">
+  <div class="zh"><h2>Settings</h2><div class="zb"><button id="lk" class="qm" aria-label="Lock the layout"></button><button id="qm" class="qm" aria-label="Help">?</button></div></div>
+    <section class="sec"><h3>Base currency</h3>
+  <div class="bk"><select id="ccy" aria-label="Base currency"></select></div>
+  <form id="ccyf" class="add" autocomplete="off"><input id="ccyin" placeholder="custom: {SGD}1/coinbase:XSGD  ({SGD} alone removes)" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done"><button type="submit">Add</button></form><p id="ccyerr" class="aerr" hidden></p>
+  </section>
+  <details id="pd" class="sec"><summary><h3>Pairs <small id="pn"></small></h3></summary>
+<ul id="plist"></ul>
+  <form id="addf" class="add" autocomplete="off"><input id="add" list="known" enterkeyhint="done" placeholder="{name}formula, e.g. {bn SOL}binance:SOL (empty = spacer)" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false"><button id="addbtn" type="submit">Add</button></form>
+  <datalist id="known"></datalist>
+  <p id="aerr" class="aerr" hidden></p>
+  <details class="help"><summary>Syntax &amp; tips</summary><pre>SOL                  Hyperliquid perp (USDC)
+hyperliquid|spot:BTC  source|type:ticker (spot instead of perp)
+binance|perp:SOL     Binance futures
+xyz:GOLD             HL builder market
+binance:SOL          Binance (USDC, else USDT)
+coinbase:SOL-USDT    force a quote
+{bn SOL}binance:SOL  rename: name in { }
+{SOL:icon=URL}SOL     custom icon: URL, base64:…, or an emoji
+embed:https://example.com  web page / video block
+embed:<b>hi</b>  raw HTML (no { } needed)
+(leave empty + Add)  invisible spacer block
+BTC/SOL   1/SOL      formulas: + - * / ( )
+{Sol bps}(binance:SOL/coinbase:SOL-1)*10000</pre><p class="hint">Any symbol can be used in a formula, even if it isn't listed (fetched as a hidden feed). Drag a block's bottom-right corner to resize it (1–4 tiles); hover a block for ✕ to close it; right-click empty space to add one. Tap any price block for a zoomed chart with its own time range; tap that chart to open the exchange page (plain entries only). Tap <b>?</b> above for the full guide. Use ✎ to edit or rename an entry. Saved on this device.</p></details>
+  </details>
+  <section class="sec"><h3>Backup &amp; config</h3>
+  <div class="bk"><span>Backup</span><button id="bx" class="ghost">Export</button><button id="bc" class="ghost">Copy</button><button id="bi" class="ghost">Import</button><button id="bp" class="ghost">Paste</button><button id="bj" class="ghost">Config</button><input id="bf" type="file" accept="application/json,.json" hidden></div>
+  <p id="bmsg" class="hint" hidden></p>
+  </section>
+  <div class="row"><button id="reset" class="ghost">Reset to defaults</button><button id="done">Done</button></div>
+</dialog>
+<dialog id="zoom">
+  <div class="zh">
+    <div class="zt"><span id="zi" class="zic"></span><h2 id="zt"></h2><span id="zsrc" class="src" hidden></span><small id="ze"></small></div>
+    <div class="zb"><a id="zo" target="_blank" rel="noopener noreferrer" hidden>Open ↗</a><button id="zed" class="xb" aria-label="Edit this block" title="Edit this block"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></svg></button><button id="zx" class="xb" aria-label="Close"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  </div>
+  <div class="zv"><b id="zp"></b><em id="zc" class="pill"></em><div id="ztfs" class="tfs" role="group" aria-label="Chart range"></div></div>
+  <div id="zstats" class="zstats"></div>
+  <form id="zf" class="add" autocomplete="off" hidden><input id="zin" placeholder="{name}formula, e.g. {bn SOL}binance:SOL" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="done"><button type="submit">Save</button></form><p id="zerr" class="aerr" hidden></p>
+  <div id="zw" class="zw"><div id="zopt" class="zo"></div><svg id="zs" viewBox="0 0 320 240"></svg><div id="ztip" hidden></div></div>
+  <p class="hint" id="zn"></p>
+</dialog>
+<dialog id="help">
+  <div class="zh"><h2 class="hh"><span>Crypto Inventario</span><small>Help</small></h2><button id="hx" class="xb" aria-label="Close"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div id="hb" class="helpbody"></div>
+  <p class="by"><a href="mailto:cryptoinventario@gmail.com?subject=Crypto%20Inventario%20feedback">— by Crypto Inventario &lt;cryptoinventario@gmail.com&gt;</a><a class="xl" href="https://x.com/CryptoInventari" target="_blank" rel="noopener noreferrer" aria-label="Crypto Inventario on X"><svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>@CryptoInventari</a></p>
+</dialog>
+<dialog id="cj">
+  <div class="zh"><h2>Config JSON</h2><button id="cjx" class="xb" aria-label="Close"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <p class="hint">Your overrides, merged on top of the built-in config and config.json. Add exchanges or change settings with no rebuild. Tap <b>?</b> in Settings for the format and examples.</p>
+  <textarea id="cjt" spellcheck="false" autocapitalize="off" autocorrect="off" autocomplete="off"></textarea>
+  <div class="row"><button id="cjd" class="ghost">Load full config</button><button id="cjr" class="ghost">Clear overrides</button><button id="cjs">Save &amp; apply</button></div>
+  <form class="add" onsubmit="return false"><input id="cjq" placeholder="Test symbol, e.g. bybit:SOL" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false"><button id="cjtest" type="button">Test</button></form>
+  <pre id="cjm" class="cjm"></pre>
+</dialog>
+</body>
+</html>
