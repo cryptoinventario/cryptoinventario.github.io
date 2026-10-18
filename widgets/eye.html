@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark"><title>Eyes · Crypto Inventario</title>
+<style>
+:root{--a1:#7c3aed;--a2:#ec4899;--a3:#22d3ee;--bg:#0a0a1f;--tx:#f4f4ff}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden}
+body{display:grid;place-items:center;-webkit-user-select:none;user-select:none;
+ background:radial-gradient(60% 40% at 0% 0%,color-mix(in srgb,var(--a1) 33%,transparent),transparent),radial-gradient(50% 40% at 100% 20%,color-mix(in srgb,var(--a3) 25%,transparent),transparent),radial-gradient(60% 40% at 30% 100%,color-mix(in srgb,var(--a2) 27%,transparent),transparent),var(--bg)}
+svg{width:80%;height:80%;overflow:visible;display:block}
+.eye{transform-box:fill-box;transform-origin:center}
+</style></head>
+<body>
+<svg id="s" viewBox="0 0 220 110" preserveAspectRatio="xMidYMid meet" aria-label="Two eyes following the mouse">
+ <g id="eyes"></g>
+</svg>
+<script>
+const NS='http://www.w3.org/2000/svg',RX=46,RY=50,IR=17,cy=55,eyes=[{cx:56},{cx:164}],INK='#1b1038';
+const g=document.getElementById('eyes');
+function el(n,a,p){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);(p||g).append(e);return e}
+for(const e of eyes){   // flat cartoon eyes: thick outline, big black pupil, two sparkles
+  const w=el('g',{class:'eye'});e.w=w;
+  el('ellipse',{cx:e.cx,cy:cy+3,rx:RX,ry:RY,fill:'#000',opacity:.25},w);
+  el('ellipse',{cx:e.cx,cy,rx:RX,ry:RY,fill:'#fff',stroke:INK,'stroke-width':5},w);
+  e.p=el('g',{},w);
+  el('circle',{cx:e.cx,cy,r:IR,fill:INK},e.p);
+  el('circle',{cx:e.cx-6,cy:cy-6,r:6,fill:'#fff'},e.p);
+  el('circle',{cx:e.cx+6,cy:cy+7,r:2.6,fill:'#fff'},e.p);
+}
+let tx=null,ty=null,seen=0,px=[0,0,0,0],blink=0,nextBlink=performance.now()+2500,idleT=0,ix=0,iy=0;
+const svg=document.getElementById('s');
+function point(cx,cy){   // pointer position in this page's own coordinates
+  tx=cx;ty=cy;seen=performance.now()}
+addEventListener('pointermove',e=>point(e.clientX,e.clientY));
+addEventListener('pointerdown',e=>{point(e.clientX,e.clientY);nextBlink=performance.now()});
+try{   // inside the dashboard the eyes also follow the mouse over the rest of the page
+  if(parent!==window){
+    const fr=frameElement,pd=parent.document;
+    pd.addEventListener('pointermove',e=>{const r=fr.getBoundingClientRect();point(e.clientX-r.left,e.clientY-r.top)},{passive:true});
+    addEventListener('pagehide',()=>{});
+  }
+}catch{}
+function frame(t){
+  const rect=svg.getBoundingClientRect(),k=Math.min(rect.width/220,rect.height/110),ox=rect.left+rect.width/2-110*k,oy=rect.top+rect.height/2-55*k;
+  const idle=t-seen>4000||tx===null;
+  if(idle&&t>idleT){idleT=t+1200+Math.random()*2200;ix=(Math.random()*2-1)*rect.width*.6;iy=(Math.random()*2-1)*rect.height*.5}   // nobody around: look about
+  eyes.forEach((e,i)=>{
+    const ex=ox+e.cx*k,ey=oy+cy*k;
+    let dx=(idle?rect.left+rect.width/2+ix:tx)-ex,dy=(idle?rect.top+rect.height/2+iy:ty)-ey;
+    const d=Math.hypot(dx,dy)||1,f=Math.min(1,d/(RY*k*2.2)),mx=dx/d*(RX-IR-6)*f,my=dy/d*(RY-IR-6)*f;
+    px[i*2]+=(mx-px[i*2])*.22;px[i*2+1]+=(my-px[i*2+1])*.22;
+    e.p.setAttribute('transform',`translate(${px[i*2].toFixed(2)} ${px[i*2+1].toFixed(2)})`);
+  });
+  if(t>nextBlink){blink=t;nextBlink=t+2500+Math.random()*4000}
+  const b=t-blink,sy=b<160?1-Math.sin(b/160*Math.PI)*.92:1;
+  eyes.forEach(e=>e.w.style.transform=`scaleY(${sy.toFixed(3)})`);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+</script>
+</body></html>

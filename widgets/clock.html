@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark"><title>Clock · Crypto Inventario</title>
+<style>
+:root{--a1:#7c3aed;--a2:#ec4899;--a3:#22d3ee;--bg:#0a0a1f;--tx:#f4f4ff;--mu:#9a9ac0}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%;overflow:hidden}
+body{display:grid;place-items:center;color:var(--tx);font:800 16px ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-user-select:none;user-select:none;
+ background:radial-gradient(60% 40% at 0% 0%,color-mix(in srgb,var(--a1) 33%,transparent),transparent),radial-gradient(50% 40% at 100% 20%,color-mix(in srgb,var(--a3) 25%,transparent),transparent),radial-gradient(60% 40% at 30% 100%,color-mix(in srgb,var(--a2) 27%,transparent),transparent),var(--bg)}
+#w{width:100%;height:100%;display:grid;place-content:center;justify-items:center;gap:.12em;padding:4%;white-space:nowrap}
+#t{display:flex;align-items:flex-end;gap:.12em;line-height:.9;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+#hm{font-weight:900;background:linear-gradient(100deg,#fff 10%,#c4b5fd 55%,#f9a8d4);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 .04em .12em #7c3aed80)}
+#s{display:flex;flex-direction:column;justify-content:space-between;align-self:stretch;padding:.14em 0 .06em;font-size:.34em;line-height:1}
+#ss{color:var(--a3);font-variant-numeric:tabular-nums}
+#ap{font-size:.8em;padding:.12em .42em;border-radius:.5em;background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;letter-spacing:.04em}
+#d{font-size:.2em;color:var(--mu);font-weight:700;letter-spacing:.02em}
+.tiny #d{display:none}
+#v{display:none;flex-direction:column;align-items:center;line-height:.86;font-variant-numeric:tabular-nums}
+#v span{display:block}
+#v .c{font-size:.5em;line-height:.6;margin:.04em 0 .1em;color:var(--a3)}
+#v .s{font-size:.62em;color:var(--a3);line-height:1}
+#v .p{font-size:.26em;margin-top:.3em;padding:.14em .5em;border-radius:.5em;background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;letter-spacing:.04em;line-height:1.1}
+#v .h{font-weight:900;background:linear-gradient(180deg,#fff 10%,#c4b5fd 60%,#f9a8d4);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 .04em .1em #7c3aed80)}
+.vt #t,.vt #d{display:none}.vt #v{display:flex}
+</style></head>
+<body>
+<div id="w"><div id="t"><span id="hm">--:--</span><span id="s"><b id="ss">--</b><b id="ap">--</b></span></div><div id="d"></div><div id="v"><span class="h" id="vh"></span><span class="c">:</span><span class="h" id="vm"></span><span class="s" id="vs"></span><span class="p" id="vp"></span></div></div>
+<script>
+const $=i=>document.getElementById(i),w=$('w'),t=$('t');
+function tick(){
+  const n=new Date(),h=n.getHours()%12||12,p=n=>String(n).padStart(2,'0');
+  $('hm').textContent=h+':'+p(n.getMinutes());
+  $('ss').textContent=p(n.getSeconds());
+  $('ap').textContent=n.getHours()<12?'AM':'PM';
+  $('vh').textContent=String(h).padStart(2,'0');$('vm').textContent=p(n.getMinutes());$('vs').textContent=p(n.getSeconds());$('vp').textContent=$('ap').textContent;
+  $('d').textContent=n.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
+  document.title=h+':'+p(n.getMinutes())+' '+$('ap').textContent;
+  fit();
+  setTimeout(tick,1000-n.getMilliseconds()+5);
+}
+function fit(){   // biggest size that fits the box: wide = one line, tall = hh / : / mm / ss stacked
+  const vt=innerHeight>innerWidth*1.15;
+  w.classList.toggle('vt',vt);
+  if(vt){
+    w.style.fontSize='100px';
+    const r=$('v').getBoundingClientRect(),k=Math.min(innerWidth*.9/r.width,innerHeight*.94/r.height);
+    w.style.fontSize=Math.max(8,100*k)+'px';return;
+  }
+  const W=innerWidth*.92,tiny=innerHeight*.9<95||W<110,H=innerHeight*(tiny?.9:.8);
+  w.classList.toggle('tiny',tiny);
+  w.style.fontSize='100px';
+  const r=t.getBoundingClientRect(),d=$('d').getBoundingClientRect();
+  const k=Math.min(W/r.width,H/(r.height+(tiny?0:d.height)));
+  w.style.fontSize=Math.max(8,100*k)+'px';
+}
+addEventListener('resize',fit);tick();
+</script>
+</body></html>

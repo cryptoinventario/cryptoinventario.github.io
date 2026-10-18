@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark"><title>Widgets · Crypto Inventario</title>
+<script>if(!/\/$|\.html$/.test(location.pathname))document.write('<base href="'+location.pathname+'/">')</script>
+<style>
+:root{--a1:#7c3aed;--a2:#ec4899;--a3:#22d3ee;--bg:#0a0a1f;--tx:#f4f4ff;--mu:#9a9ac0}
+*{box-sizing:border-box;margin:0}
+html{background:var(--bg)}
+body{min-height:100dvh;color:var(--tx);font:16px/1.4 ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:max(20px,env(safe-area-inset-top)) 20px 40px;
+ background:radial-gradient(60% 40% at 0% 0%,color-mix(in srgb,var(--a1) 33%,transparent),transparent),radial-gradient(50% 40% at 100% 20%,color-mix(in srgb,var(--a3) 25%,transparent),transparent),radial-gradient(60% 40% at 30% 100%,color-mix(in srgb,var(--a2) 27%,transparent),transparent),var(--bg);background-attachment:fixed}
+main{max-width:980px;margin:0 auto}
+h1{font-size:clamp(28px,6vw,44px);font-weight:900;line-height:1.1;margin:18px 0 6px;background:linear-gradient(100deg,#fff 30%,#c4b5fd 70%,#f9a8d4);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mu);max-width:60ch}
+.sub a,.back{color:#a5f3fc;text-decoration:none;font-weight:700}
+.back{display:inline-block;margin-bottom:4px}
+code{font:600 .88em ui-monospace,SFMono-Regular,Menlo,monospace;background:#ffffff14;padding:.12em .45em;border-radius:6px;color:#e9d5ff}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:26px}
+.c{display:flex;flex-direction:column;border-radius:22px;border:1.5px solid #ffffff22;background:linear-gradient(155deg,#17173a,#0e0e24 80%);box-shadow:0 14px 30px -18px #000;overflow:hidden}
+.pv{position:relative;aspect-ratio:16/10;background:#000;border-bottom:1.5px solid #ffffff18}
+.pv iframe{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none}
+.pv a{position:absolute;inset:0;z-index:1}
+.in{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px}
+.in h2{font-size:20px;font-weight:900}
+.in p{color:var(--mu);font-size:14px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:6px;font-size:13px;color:var(--mu)}
+.btn{display:inline-block;padding:7px 14px;border-radius:999px;background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;text-decoration:none;font-weight:800;font-size:14px}
+.u{word-break:break-all;font-size:12px;color:var(--mu)}
+footer{margin-top:34px;color:var(--mu);font-size:14px}
+</style></head>
+<body><main>
+<a class="back" href="../">← Crypto Inventario</a>
+<h1>Widgets</h1>
+<p class="sub">Small standalone pages made to fit the Crypto Inventario wall, and just as happy on their own. Open one, or use its link anywhere you can embed a web page.</p>
+<div class="grid" id="g"></div>
+<footer>In Crypto Inventario, add a block and type <code>[clock]</code>, <code>[calculator]</code>, <code>[calendar]</code> or <code>[eye]</code>. A block is the same as embedding <code class="h">https://host/widgets/clock.html</code>. Widgets use your device's own time and need no account or network.</footer>
+</main>
+<script>
+const W=[['clock','Clock','Big, bold digital clock in your local time with AM / PM, seconds and today\'s date. Scales to any size.'],
+['calculator','Calculator','Starts simple, turns scientific when there is room: trig, logs, powers, roots, factorials, DEG / RAD. Keyboard works too.'],
+['calendar','Calendar','Day, week, month or three months, depending on how much space it has. Today is highlighted; arrows browse.'],
+['eye','Eyes','Two eyes that look at your mouse. Just for fun.']];
+const base=new URL('.',location.href).href,g=document.getElementById('g');
+g.innerHTML=W.map(([k,n,d])=>`<div class="c"><div class="pv"><iframe src="${k}.html" loading="lazy" tabindex="-1" title="${n}"></iframe><a href="${k}.html" aria-label="Open ${n}"></a></div><div class="in"><h2>${n}</h2><p>${d}</p><div class="row"><a class="btn" href="${k}.html">Open</a><span>in the app: <code>[${k}]</code></span></div><div class="u">${base}${k}.html</div></div></div>`).join('');
+document.querySelector('.h').textContent=base+'clock.html';
+</script></body></html>

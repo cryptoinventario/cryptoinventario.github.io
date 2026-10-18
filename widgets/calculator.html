@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark"><title>Calculator · Crypto Inventario</title>
+<style>
+:root{--a1:#7c3aed;--a2:#ec4899;--a3:#22d3ee;--bg:#0a0a1f;--tx:#f4f4ff;--mu:#9a9ac0}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{color:var(--tx);font:800 16px ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-user-select:none;user-select:none;
+ background:radial-gradient(60% 40% at 0% 0%,color-mix(in srgb,var(--a1) 33%,transparent),transparent),radial-gradient(50% 40% at 100% 20%,color-mix(in srgb,var(--a3) 25%,transparent),transparent),radial-gradient(60% 40% at 30% 100%,color-mix(in srgb,var(--a2) 27%,transparent),transparent),var(--bg)}
+#app{height:100%;display:grid;grid-template-rows:minmax(0,var(--dh,22%)) minmax(0,1fr);gap:var(--g,8px);padding:var(--g,8px)}
+#dp{display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;min-height:0;padding:0 .3em;overflow:hidden;text-align:right}
+#ex{display:flex;justify-content:flex-end;color:var(--mu);font-weight:700;white-space:nowrap;overflow:hidden;width:100%;font-size:var(--ef,18px);min-height:1.2em;line-height:1.2}#ex span{flex:none}
+#rs{font-weight:900;line-height:1.05;white-space:nowrap;font-variant-numeric:tabular-nums;letter-spacing:-.01em;background:linear-gradient(100deg,#fff 20%,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent}
+#rs.err{background:none;color:#ff5c7c}
+#pad{display:grid;gap:var(--g,8px);min-height:0;grid-template-columns:1fr}
+#sci,#bas{display:grid;gap:var(--g,8px);min-height:0}
+#sci{grid-template-columns:repeat(5,1fr);display:none}
+#bas{grid-template-columns:repeat(4,1fr)}
+body[data-m=sci] #sci{display:grid}
+body[data-m=sci] #pad{grid-template-columns:var(--sw,1fr) 1fr}
+body[data-m=sci][data-s=tall] #pad{grid-template-columns:1fr;grid-template-rows:var(--sr,2fr) 5fr}
+button{font:inherit;color:inherit;border:0;border-radius:var(--rd,16px);min-width:0;min-height:0;cursor:pointer;display:grid;place-items:center;padding:0;background:#ffffff14;box-shadow:inset 0 0 0 1.5px #ffffff1f;transition:transform .08s,background .15s;font-size:var(--bf,22px)}
+button:hover{background:#ffffff22}
+button:active{transform:scale(.94);background:#ffffff33}
+button.f{background:#7c3aed40;box-shadow:inset 0 0 0 1.5px #a78bfa66}
+button.o{background:#22d3ee26;box-shadow:inset 0 0 0 1.5px #22d3ee66;color:#67e8f9}
+button.c{background:#ff5c7c26;box-shadow:inset 0 0 0 1.5px #ff5c7c66;color:#ff8da3}
+button.eq{background:linear-gradient(135deg,var(--a1),var(--a2));box-shadow:0 8px 20px -10px var(--a2);color:#fff}
+button.on{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff}
+#sci button{font-size:var(--sf,16px)}
+</style></head>
+<body data-m="simple">
+<div id="app">
+ <div id="dp"><div id="ex"></div><div id="rs">0</div></div>
+ <div id="pad">
+  <div id="sci"></div>
+  <div id="bas"></div>
+ </div>
+</div>
+<script>
+const SCI=[['DEG','deg','f'],['(','(','f'],[')',')','f'],['π','π','f'],['e','e','f'],
+ ['sin','sin(','f'],['cos','cos(','f'],['tan','tan(','f'],['ln','ln(','f'],['log','log(','f'],
+ ['asin','asin(','f'],['acos','acos(','f'],['atan','atan(','f'],['eˣ','e^','f'],['10ˣ','10^','f'],
+ ['x²','^2','f'],['xʸ','^','f'],['√','√(','f'],['x!','!','f'],['1/x','1/(','f']];
+const BAS=[['C','clr','c'],['⌫','bs','c'],['%','%','o'],['÷','/','o'],
+ ['7','7'],['8','8'],['9','9'],['×','*','o'],
+ ['4','4'],['5','5'],['6','6'],['−','-','o'],
+ ['1','1'],['2','2'],['3','3'],['+','+','o'],
+ ['±','neg','f'],['0','0'],['.','.'],['=','eq','eq']];
+let ex='',res='',hist='',deg=true,done=false;
+const $=i=>document.getElementById(i),body=document.body;
+function mk(box,list){list.forEach(([l,v,c])=>{const b=document.createElement('button');b.textContent=l;b.dataset.v=v;if(c)b.className=c;if(v==='deg')b.id='deg';box.append(b)})}
+mk($('sci'),SCI);mk($('bas'),BAS);
+/* --- a small safe expression parser (no eval) --- */
+const FN={sin:x=>Math.sin(deg?x*Math.PI/180:x),cos:x=>Math.cos(deg?x*Math.PI/180:x),tan:x=>Math.tan(deg?x*Math.PI/180:x),
+ asin:x=>{const r=Math.asin(x);return deg?r*180/Math.PI:r},acos:x=>{const r=Math.acos(x);return deg?r*180/Math.PI:r},atan:x=>{const r=Math.atan(x);return deg?r*180/Math.PI:r},
+ ln:Math.log,log:Math.log10,'√':Math.sqrt};
+function fact(n){if(n<0||n!==Math.floor(n)||n>170)return NaN;let r=1;for(let i=2;i<=n;i++)r*=i;return r}
+function calc(src){
+  const s=src.replace(/\s+/g,'')+')'.repeat(Math.max(0,(src.match(/\(/g)||[]).length-(src.match(/\)/g)||[]).length));
+  let i=0;
+  const peek=()=>s[i],eat=c=>s[i]===c?(i++,true):false;
+  const startsPrimary=()=>/[0-9.πe(√a-z]/.test(s[i]||'');
+  function expr(){let a=term();for(;;){if(eat('+'))a+=term();else if(eat('-'))a-=term();else return a}}
+  function term(){let a=unary();for(;;){if(eat('*'))a*=unary();else if(eat('/'))a/=unary();else if(startsPrimary())a*=unary();else return a}}
+  function unary(){if(eat('-'))return -unary();if(eat('+'))return unary();return pow()}
+  function pow(){let a=post();if(eat('^'))return Math.pow(a,unary());return a}
+  function post(){let a=prim();for(;;){if(eat('!'))a=fact(a);else if(eat('%'))a/=100;else return a}}
+  function prim(){
+    if(eat('(')){const v=expr();eat(')');return v}
+    if(eat('π'))return Math.PI;
+    if(eat('√')){return Math.sqrt(prim())}
+    let m=s.slice(i).match(/^(\d+\.?\d*|\.\d+)(e[+-]?\d+)?/);
+    if(m&&!/^\d+\.?\d*e(?![+-]?\d)/.test(m[0]+'x')){i+=m[0].length;return parseFloat(m[0])}
+    m=s.slice(i).match(/^(asin|acos|atan|sin|cos|tan|ln|log)/);
+    if(m){i+=m[0].length;return FN[m[0]](prim())}
+    if(eat('e'))return Math.E;
+    throw 0;
+  }
+  const v=expr();if(i<s.length)throw 0;return v;
+}
+function fmt(v){
+  if(!isFinite(v))return 'Error';
+  if(Object.is(v,-0))v=0;
+  let r=+v.toPrecision(12);
+  const a=Math.abs(r);
+  if(a!==0&&(a>=1e15||a<1e-9))return r.toExponential(6).replace(/\.?0+e/,'e').replace('e+','e');
+  return String(r);
+}
+function show(){
+  $('ex').innerHTML='<span></span>';$('ex').firstChild.textContent=done?hist:ex;
+  let r;
+  if(done)r=res;
+  else if(!ex)r='0';
+  else{
+    try{const v=calc(ex);r=/[+\-*/^!%(]/.test(ex.replace(/^-/,''))||/[a-zπ√]/.test(ex)?fmt(v):ex}catch{r=''}
+    if(r==='Error')r='';
+  }
+  $('rs').className='';$('rs').textContent=r||(ex?ex.slice(-1):'0');
+  fitRs();
+}
+function fitRs(){   // the result is as big as the display allows
+  const rs=$('rs'),dp=$('dp'),h=dp.clientHeight,ef=Math.max(11,Math.min(h*.22,28));
+  dp.style.setProperty('--ef',ef+'px');
+  rs.style.fontSize=Math.max(16,Math.min(h*.66,120))+'px';
+  const k=Math.min(1,dp.clientWidth*.96/Math.max(1,rs.scrollWidth));
+  rs.style.fontSize=Math.max(12,parseFloat(rs.style.fontSize)*k)+'px';
+}
+function press(v){
+  const last=ex.slice(-1),isOp=c=>/[+\-*/^]/.test(c);
+  if(v==='deg'){deg=!deg;$('deg').textContent=deg?'DEG':'RAD';return}
+  if(v==='clr'){ex='';res='';done=false;return show()}
+  if(v==='bs'){if(done){done=false;ex=res}ex=ex.replace(/(asin|acos|atan|sin|cos|tan|ln|log)\($|.$/u,'');return show()}
+  if(v==='neg'){if(done){ex=res;done=false}ex=ex.startsWith('-')?ex.slice(1):'-'+ex;return show()}
+  if(v==='eq'){
+    if(!ex||done)return;
+    let r;try{r=fmt(calc(ex))}catch{r='Error'}
+    if(r==='Error'){$('rs').className='err';$('rs').textContent='Error';fitRs();return}
+    hist=ex+' =';res=r;done=true;return show();
+  }
+  if(done){   // after "=": a number starts fresh, an operator continues from the result
+    done=false;ex=(isOp(v)||v==='%'||v==='!')?res:''}
+  if(isOp(v)&&isOp(last)&&!(v==='-'&&/[*/^]/.test(last)))ex=ex.slice(0,-1);
+  if(v==='.'){const seg=ex.split(/[^0-9.]/).pop();if(seg.includes('.'))return}
+  if(/[+*/^]/.test(v)&&(ex===''||last==='('))return;
+  ex+=v;show();
+}
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(b)press(b.dataset.v)});
+addEventListener('keydown',e=>{
+  if(e.ctrlKey||e.metaKey||e.altKey)return;const k=e.key;
+  if(/^[0-9.+\-*/^%!()]$/.test(k))press(k);else if(k==='Enter'||k==='=')press('eq');else if(k==='Backspace')press('bs');else if(k==='Escape')press('clr');else if(k==='p')press('π');else return;
+  e.preventDefault()});
+/* --- layout: the viewport decides simple / scientific, and how big everything is --- */
+function layout(){
+  const W=innerWidth,H=innerHeight,g=Math.max(4,Math.min(10,Math.round(Math.min(W,H)/46)));
+  const sci=(W>=520&&H>=330)||(W>=340&&H>=640),tall=sci&&W<520;
+  body.dataset.m=sci?'sci':'simple';body.dataset.s=tall?'tall':'wide';
+  const st=document.documentElement.style,dh=H<260?.26:H<420?.22:.2;
+  st.setProperty('--g',g+'px');st.setProperty('--rd',Math.max(8,Math.min(20,Math.min(W,H)/16))+'px');
+  st.setProperty('--dh',dh*100+'%');st.setProperty('--sw','1.25fr');st.setProperty('--sr','2fr');
+  const padH=H*(1-dh)-g*3,padW=W-g*2,sciW=sci&&!tall?padW*1.25/2.25:padW,basW=sci&&!tall?padW/2.25:padW;
+  const bh=(tall?padH*5/7:padH)/5,bw=basW/4;
+  st.setProperty('--bf',Math.max(13,Math.min(bh*.5,bw*.5,64))+'px');
+  const sh=tall?padH*2/7/4:padH/4;
+  st.setProperty('--sf',Math.max(11,Math.min(sh*.4,sciW/5*.3,30))+'px');
+  fitRs();
+}
+addEventListener('resize',layout);layout();show();
+</script>
+</body></html>

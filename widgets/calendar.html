@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark"><title>Calendar · Crypto Inventario</title>
+<style>
+:root{--a1:#7c3aed;--a2:#ec4899;--a3:#22d3ee;--bg:#0a0a1f;--tx:#f4f4ff;--mu:#9a9ac0}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{color:var(--tx);font:800 16px ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-user-select:none;user-select:none;
+ background:radial-gradient(60% 40% at 0% 0%,color-mix(in srgb,var(--a1) 33%,transparent),transparent),radial-gradient(50% 40% at 100% 20%,color-mix(in srgb,var(--a3) 25%,transparent),transparent),radial-gradient(60% 40% at 30% 100%,color-mix(in srgb,var(--a2) 27%,transparent),transparent),var(--bg)}
+#app{height:100%;display:flex;flex-direction:column;padding:var(--p,8px);gap:var(--p,8px)}
+#hd{display:flex;align-items:center;gap:.5em;font-size:var(--hf,20px);flex:none}
+#ti{flex:1;font-weight:900;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;background:linear-gradient(100deg,#fff 30%,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent}
+#ti small{font-size:.62em;color:var(--mu);-webkit-text-fill-color:var(--mu);font-weight:800;margin-left:.4em}
+#hd button{font:inherit;width:1.7em;height:1.7em;border-radius:50%;border:0;color:inherit;background:#ffffff14;box-shadow:inset 0 0 0 1.5px #ffffff1f;cursor:pointer;display:grid;place-items:center;line-height:1}
+#hd #td[hidden]{display:none}
+#hd button:hover{background:#ffffff26}
+#hd #td{width:auto;border-radius:1em;padding:0 .8em;font-size:.7em;height:2.2em;background:linear-gradient(135deg,var(--a1),var(--a2));box-shadow:none;color:#fff}
+#bd{flex:1;min-height:0;display:grid;gap:var(--p,8px)}
+.mo{display:grid;grid-template-rows:auto 1fr;min-height:0;min-width:0}
+.mt{font-size:var(--tf,16px);font-weight:900;color:var(--mu);padding:0 .2em .3em}
+.g{display:grid;grid-template-columns:repeat(7,1fr);min-height:0;gap:2px}
+.wd{display:grid;place-items:center;color:var(--mu);font-size:var(--wf,14px);font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.d{display:grid;place-items:center;border-radius:var(--rd,12px);font-size:var(--df,22px);font-weight:800;min-width:0;min-height:0;font-variant-numeric:tabular-nums;position:relative}
+.d.o{color:#ffffff40;font-weight:700}
+.d.we{color:#f9a8d4}.d.o.we{color:#f9a8d440}
+.d.t{background:linear-gradient(135deg,var(--a1),var(--a2));color:#fff;font-weight:900;box-shadow:0 6px 20px -8px var(--a2),inset 0 0 0 1.5px #ffffff55}
+/* week: seven columns, or seven rows when narrow */
+.wk{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--p,8px);min-height:0}
+.wk.v{grid-template-columns:1fr;grid-template-rows:repeat(7,1fr)}
+.wc{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1em;border-radius:var(--rd,14px);background:#ffffff0f;box-shadow:inset 0 0 0 1.5px #ffffff17;min-width:0;min-height:0;overflow:hidden}
+.wk.v .wc{flex-direction:row;justify-content:flex-start;gap:.7em;padding:0 .8em}
+.wc .n{font-size:var(--nf,36px);font-weight:900;line-height:1;font-variant-numeric:tabular-nums}
+.wc .w{font-size:var(--wf,14px);color:var(--mu);text-transform:uppercase;letter-spacing:.05em}
+.wc.we .w{color:#f9a8d4}
+.wc.t{background:linear-gradient(135deg,var(--a1),var(--a2));box-shadow:0 6px 20px -8px var(--a2),inset 0 0 0 1.5px #ffffff55}
+.wc.t .w{color:#ffffffd0}
+/* day: one big date */
+.dy{display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:var(--rd,18px);background:linear-gradient(155deg,#7c3aed55,#ec489933);box-shadow:inset 0 0 0 1.5px #ffffff2a;min-height:0;line-height:1}
+.dy .w{font-size:var(--wf);text-transform:uppercase;letter-spacing:.08em;color:#fbcfe8}
+.dy .n{font-size:var(--nf);font-weight:900;margin:.04em 0}
+.dy .m{font-size:var(--mf);color:#ddd6fe}
+body.m3 #bd{grid-template-columns:repeat(3,1fr)}
+body.nohd #hd{display:none}
+</style></head>
+<body>
+<div id="app"><div id="hd"><button id="pv" aria-label="Previous">‹</button><div id="ti"></div><button id="td" hidden>Today</button><button id="nx" aria-label="Next">›</button></div><div id="bd"></div></div>
+<script>
+const $=i=>document.getElementById(i),bd=$('bd'),root=document.documentElement.style;
+const q=new URLSearchParams(location.search);
+let fd=+q.get('start');   // ?start=0 (Sunday) … 6; otherwise the browser's own week start
+if(!q.has('start')){try{const wi=new Intl.Locale(navigator.language).getWeekInfo?.()||new Intl.Locale(navigator.language).weekInfo;fd=wi?wi.firstDay%7:0}catch{fd=0}}
+else if(q.get('start')==='mon')fd=1;
+let off=0,mode='month',today=new Date();
+const L=undefined,fmtD=(d,o)=>d.toLocaleDateString(L,o);
+const sod=d=>new Date(d.getFullYear(),d.getMonth(),d.getDate());
+const same=(a,b)=>a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
+const add=(d,n)=>new Date(d.getFullYear(),d.getMonth(),d.getDate()+n);
+const names=(f)=>Array.from({length:7},(_,i)=>fmtD(new Date(2023,0,1+(i+fd)%7),{weekday:f}));
+const wk0=d=>add(sod(d),-((d.getDay()-fd+7)%7));
+function pick(W,H){   // the viewport decides the view
+  if(W<190||H<130||(W<260&&H<190))return 'day';
+  if(H<250&&W>=H*2.1)return 'week';
+  if(W<250&&H>=W*1.5)return 'weekv';
+  if(W>=900&&H>=440)return 'm3';
+  return 'month';
+}
+function monthHtml(base,title){
+  const first=new Date(base.getFullYear(),base.getMonth(),1),start=wk0(first),n=Math.ceil(((first-start)/864e5+new Date(base.getFullYear(),base.getMonth()+1,0).getDate())/7);
+  let h='<div class="mo">'+(title?`<div class="mt">${fmtD(base,{month:'long',year:'numeric'})}</div>`:'<div></div>')+`<div class="g" style="grid-template-rows:auto repeat(${n},1fr)">`;
+  names('short').forEach(x=>h+=`<div class="wd">${x.slice(0,3)}</div>`);
+  for(let i=0;i<n*7;i++){const d=add(start,i),c=['d'];if(d.getMonth()!==base.getMonth())c.push('o');if(d.getDay()%6===0)c.push('we');if(same(d,today))c.push('t');h+=`<div class="${c.join(' ')}">${d.getDate()}</div>`}
+  return h+'</div></div>';
+}
+function render(){
+  today=new Date();
+  const W=innerWidth,H=innerHeight,m=pick(W,H);mode=m;
+  document.body.className=(m==='m3'?'m3 ':'')+(m==='day'?'nohd':'');
+  const p=Math.max(4,Math.min(14,Math.round(Math.min(W,H)/40)));
+  root.setProperty('--p',p+'px');root.setProperty('--rd',Math.max(8,Math.min(18,Math.min(W,H)/12))+'px');
+  const hf=Math.max(14,Math.min(34,Math.min(W/11,H/9)));root.setProperty('--hf',hf+'px');
+  const bodyH=H-p*2-hf*2-(m==='day'?0:p);
+  let html='',title='';
+  if(m==='day'){
+    const nf=Math.min(W*.55,H*.5);root.setProperty('--nf',nf+'px');root.setProperty('--wf',Math.max(11,Math.min(W/9,H/9,nf*.3))+'px');root.setProperty('--mf',Math.max(11,Math.min(W/10,H/10,nf*.26))+'px');
+    html=`<div class="dy"><div class="w">${fmtD(today,{weekday:'long'})}</div><div class="n">${today.getDate()}</div><div class="m">${fmtD(today,{month:'long',year:'numeric'})}</div></div>`;bd.style.gridTemplateRows='1fr';
+  }else if(m==='week'||m==='weekv'){
+    const s=add(wk0(today),off*7),e=add(s,6);
+    title=fmtD(s,{month:'short',day:'numeric'})+' – '+fmtD(e,{month:'short',day:'numeric'})+`<small>${e.getFullYear()}</small>`;
+    const v=m==='weekv',cw=v?W:W/7,ch=v?bodyH/7:bodyH;
+    root.setProperty('--nf',Math.max(14,Math.min(v?ch*.62:cw*.5,v?cw*.2:ch*.5,90))+'px');root.setProperty('--wf',Math.max(10,Math.min(v?ch*.3:cw*.2,v?cw*.1:ch*.16,26))+'px');
+    html=`<div class="wk${v?' v':''}">`+Array.from({length:7},(_,i)=>{const d=add(s,i),c=['wc'];if(d.getDay()%6===0)c.push('we');if(same(d,today))c.push('t');return `<div class="${c.join(' ')}"><span class="${v?'':'w'}" ${v?'style="display:none"':''}>${fmtD(d,{weekday:'short'})}</span>${v?`<span class="n">${d.getDate()}</span><span class="w">${fmtD(d,{weekday:'long'})}</span>`:`<span class="n">${d.getDate()}</span>`}</div>`}).join('')+'</div>';
+    bd.style.gridTemplateRows='1fr';
+  }else{
+    const base=new Date(today.getFullYear(),today.getMonth()+off,1),cols=m==='m3'?3:1,cw=W/cols,rows=6;
+    title=fmtD(base,{month:'long'})+`<small>${base.getFullYear()}</small>`;
+    if(m==='m3')title=fmtD(add(base,-1)&&new Date(base.getFullYear(),base.getMonth()-1,1),{month:'short'})+' – '+fmtD(new Date(base.getFullYear(),base.getMonth()+1,1),{month:'short',year:'numeric'});
+    const ch=(bodyH-(m==='m3'?hf:0))/(rows+1);
+    root.setProperty('--df',Math.max(11,Math.min(cw/7*.5,ch*.5,60))+'px');root.setProperty('--wf',Math.max(9,Math.min(cw/7*.3,ch*.36,20))+'px');root.setProperty('--tf',Math.max(12,Math.min(hf*.7,22))+'px');
+    html=m==='m3'?[-1,0,1].map(k=>monthHtml(new Date(base.getFullYear(),base.getMonth()+k,1),true)).join(''):monthHtml(base,false);
+    bd.style.gridTemplateRows='1fr';
+  }
+  $('ti').innerHTML=title;$('td').hidden=!off;bd.innerHTML=html;
+}
+$('pv').onclick=()=>{off--;render()};$('nx').onclick=()=>{off++;render()};$('td').onclick=$('ti').onclick=()=>{off=0;render()};
+addEventListener('resize',render);addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){off--;render()}else if(e.key==='ArrowRight'){off++;render()}else if(e.key==='Home'){off=0;render()}});
+let dd=today.getDate();setInterval(()=>{const n=new Date();if(n.getDate()!==dd){dd=n.getDate();render()}},30000);
+render();
+</script>
+</body></html>
